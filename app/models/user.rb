@@ -21,4 +21,16 @@ class User < ApplicationRecord
   has_secure_password
 
   validates :password, presence: true, length: { minimum: 6 }
+
+  # 渡された文字列のハッシュ値を返す
+  #fixture(テスト用のユーザーデータを流し込む場所的な)用に、
+  # password_digestの文字列をハッシュ化して、ハッシュ値として返す
+  def User.digest(string)
+    # min_costでコストパラメータを最小にし、
+    # costでしっかりとしたコストパラメータを渡している。
+    cost = ActiveModel::SecurePassword.min_cost ? BCrypt::Engine::MIN_COST :
+                                                  BCrypt::Engine.cost
+    # string=ハッシュ化する文字列 cost=コストパラメータ
+    BCrypt::Password.create(string, cost: cost)
+  end
 end

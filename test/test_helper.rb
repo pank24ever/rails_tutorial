@@ -7,5 +7,10 @@ class ActiveSupport::TestCase
   fixtures :all
   include ApplicationHelper
 
-  # Add more helper methods to be used by all tests here...
+  # テストユーザーがログイン中の場合にtrueを返す
+  # テストのセッションにユーザーがあればtrueを返し、それ以外の場合はfalseを返します
+  # sessions_helperに対してテストする4
+  def is_logged_in?
+    !session[:user_id].nil?
+  end
 end

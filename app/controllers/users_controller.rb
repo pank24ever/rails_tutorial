@@ -12,6 +12,9 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
+      # SessionsHelperのログインするメソッド
+      # log_inメソッド(ログイン)の引数として@user(ユーザーオブジェクト)を渡す。要はセッションに渡すってこと
+      log_in @user
       redirect_to @user
       flash[:success] = "Welcome to the Sample App!"
     else
