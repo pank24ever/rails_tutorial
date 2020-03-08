@@ -29,6 +29,12 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     # テストユーザーのセッションが空、ログインしていなければ（ログアウトできたら）true
     assert_not is_logged_in?
     assert_redirected_to root_url
+
+    #2番目のウィンドウでログアウトをクリックするユーザーをシミュレートする
+    # 2回目のログアウトでcurrent_userがないためテストが「失敗することを確認」
+    # このままでは、テストは通らないため「sessions_controller.rb」の
+    # destroyメソッドに、ログアウトする時はログインしている時という条件式を追加する
+    delete logout_path
     follow_redirect!
     # login_path(/login)がhref=/loginというソースコードで存在していればtrue
     assert_select "a[href=?]", login_path
@@ -50,5 +56,39 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     assert_not flash.empty?
     get root_path
     assert flash.empty?
+  end
+
+  # チェックボックスのテスト
+  # ログイン時に記憶トークンがcookiesに保存されているか検証
+  test "login with remembering" do
+    # michaelが有効な値でログインできて、なおかつチェックマーク付けていればtrue
+    log_in_as(@user, remember_me: '1')
+    # 記憶トークンが空でなければtrue
+
+    # テスト内ではcookiesメソッドにシンボルを使えない
+    # そのため、cookies[:remember_token]
+    # 上のコードは常にnilになってしまいます
+    # 文字列をキーにすればcookiesでも使えるようになるので↓のコードに変更
+    # assert_not_empty cookies['remember_token']
+
+    # 記憶トークンが空でなければtrue
+    # assignsという特殊なテストメソッドを使うと仮想のremember_token属性にアクセスできるようになる。
+    # Sessionsコントローラで定義したインスタンス変数にアクセスするには、
+    # テスト内部でassignsメソッドを使う
+    assert_equal cookies['remember_token'], assigns(:user).remember_token
+  end
+
+  # クッキーの保存の有無をテスト
+  test "login without remembering" do
+    # クッキーを保存してログイン
+    # チェックボックスが「オン」に対するテスト
+
+    # ※remember_meのデフォルト値は1なので、remember_me '1'は省略しても良い
+    log_in_as(@user, remember_me: '1')
+    delete logout_path
+    # クッキーを削除してログイン
+    # チェックボックスが「オフ」に対するテスト
+    log_in_as(@user, remember_me: '0')
+    assert_empty cookies['remember_token']
   end
 end
