@@ -42,7 +42,12 @@ class SessionsController < ApplicationController
       # user.rbのメソッド
       # redirect_to user
 
-      redirect_to @user
+
+      # redirect_to @user↓変更
+      # session.helperにある記憶したURL (もしくはデフォルト値) にリダイレクトメソッド
+      # redirect_back_or user
+      # Tutorialでは@userではなくuserが使われているが、使うとusers_login_testでエラーが発生
+      redirect_back_or @user
     else
       # エラーメッセージを作成する
 

@@ -24,6 +24,11 @@ module SessionsHelper
     cookies.permanent[:remember_token] = user.remember_token
   end
 
+  # 渡されたユーザーがログイン済みユーザーであればtrueを返す
+  def current_user?(user)
+    user == current_user
+  end
+
   # 記憶トークンcookieに対応するユーザーを返す
   def current_user
     # # if文を使うことで、ユーザーが存在しない場合はnilを返して終わり
@@ -141,5 +146,35 @@ module SessionsHelper
     session.delete(:user_id)
     # 現在のログインユーザー（一時的なcookies）をnil（空に）する
     @current_user = nil
+  end
+
+  # 記憶したURL (もしくはデフォルト値) にリダイレクト
+  # リクエストされたURLが「存在する」場合はそこにリダイレクトし、
+  # 「ない場合」は何らかのデフォルトのURLにリダイレクト
+  def redirect_back_or(default)
+    # or演算子||
+    # session[:forwarding_url] || default
+    # このコードは、値がnilでなければsession[:forwarding_url]を評価し、
+    # そうでなければデフォルトのURLを使っています
+    redirect_to(session[:forwarding_url] || default)
+    # 転送用のURLを削除している
+    # →次回ログインしたときに保護されたページに転送されてしまい、
+    # ブラウザを閉じるまでこれが繰り返されてしまう
+    session.delete(:forwarding_url)
+  end
+
+  # アクセスしようとしたURLを覚えておく
+  def store_location
+    # GETリクエストが送られたときだけ格納するようにする
+    # →例えばログインしていないユーザーがフォームを使って送信した場合、
+    # 転送先のURLを保存させないようにする
+
+    # ユーザがセッション用のcookieを手動で削除して、フォームから送信するとする
+    # こういったケースに対処しておかないと、
+    # POSTやPATCH、DELETEリクエストを期待しているURLに対して、GETリクエストが送られてしまい、
+    # 場合によってはエラーが発生する。
+    # これらの問題を
+    # if request.get?という条件文を使って対応
+    session[:forwarding_url] = request.original_url if request.get?
   end
 end

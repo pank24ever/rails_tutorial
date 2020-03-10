@@ -20,9 +20,23 @@ class User < ApplicationRecord
                     # uniqueness: true, ↓このままでは一意性検証では
                     # 大文字小文字で区別はされているが同じメールアドレスが複製可能となっている
                     uniqueness: { case_sensitive: false }
+
+  # DBにレコード(オブジェクト)が生成された時だけ存在性(nilかどうか)のvalidationを行う
+  # →実際にpasswordを作成する際は、nilかどうかの検証を行ってくれる
+  # →実行環境でpasswordが空だった場合のvalidation機能を保持したまま、
+  # テストで空だった場合にvalidationを通すことができる
   has_secure_password
 
-  validates :password, presence: true, length: { minimum: 6 }
+  # テストでは、名前とemailだけで更新できるようにしている
+  # →しかし、allow_nil: true
+  # パスワードが空のままでも更新できるようにする、空だった時の例外処理を加える
+  # validates :password, presence: true, length: { minimum: 6 }のままでは
+  # パスワードが空ですよと怒られてしまうため、「allow_nil」を追加する
+  # passwordが空だったとしたらvalidationをスルー(true)する例外処理
+
+    # allow_nilのおかげでhas_secure_passwordによるバリデーションがそれぞれ実行され、
+    # 二つのエラーメッセージが表示されるバグも解決
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
   # 渡された文字列のハッシュ値を返す
   #fixture(テスト用のユーザーデータを流し込む場所的な)用に、

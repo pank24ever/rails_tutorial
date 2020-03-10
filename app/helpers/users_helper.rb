@@ -1,7 +1,7 @@
 module UsersHelper
-   # 引数で与えられたユーザーのGravatar画像を返す
+  # 引数で与えられたユーザーのGravatar画像を返す
   #  APIを使用している
-   def gravatar_for(user, options = { size: 80 })
+  def gravatar_for(user, options = { size: 80 })
     #小文字化したuserメールをMD5でハッシュ化し、変数に代
     gravatar_id = Digest::MD5::hexdigest(user.email.downcase)
     size = options[:size]
