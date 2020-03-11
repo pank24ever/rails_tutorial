@@ -29,74 +29,89 @@ module SessionsHelper
     user == current_user
   end
 
-  # 記憶トークンcookieに対応するユーザーを返す
+  # # 記憶トークンcookieに対応するユーザーを返す
+  # def current_user
+  #   # # if文を使うことで、ユーザーが存在しない場合はnilを返して終わり
+  #   # # いない場合でも何回もDBへ問い合わせしていないので早い
+
+  #   # # いる場合は、ログインユーザーのidとDBのidが同じユーザーを返している
+  #   # 現在ログイン中のユーザーを返す (いる場合)
+  #   # if session[:user_id]
+  #   #   # User.find(session[:user_id])だとユーザーIDが存在しない状態でfindを使うと例外が発生してしまう
+
+  #   #   # User.find_by(id: session[:user_id])だと
+  #   #   # IDが無効（ユーザーが存在しない）の場合でもメソッドはエラーを発生せずに「nil」を返してくれる
+
+  #   #   # 実行結果をインスタンス変数に代入する
+  #   #   # こうすることで、1リクエスト内におけるDBへの問い合わせは最初の一回だけになり、
+  #   #   # 以後の呼び出しではインスタンス変数の結果を再利用するだけになる。
+  #   #   # Webサービスを高速化させる重要なテクニック
+
+  #   #   # or演算子「||」
+  #   #   # ||=は、手前の@current_userがあれば@current_userに代入、なければUser.find〜を代入
+
+  #   #   # ログインユーザーがいればそのまま、いなければcookiesのユーザーidと同じidを持つユーザーを
+  #   #   # DBから探して@current_user（現在のログインユーザー）に代入
+  #   #   @current_user ||= User.find_by(id: session[:user_id])
+  #   # end
+
+
+  #   # ↑のコードでは、ログインするユーザーはブラウザで有効な記憶トークンを得られるように記憶されているが、
+  #   # current_userメソッドでは一時セッションしか扱っておらず、
+  #   # このままでは正常に動作しない。
+  #   # つまり、今のままでは現在のログイン中ユーザーがいない場合、
+  #   # 全部sessionID（一時的なid）がcookieとして保存されてしまう
+
+  #   # if session[:user_id]
+  #   #   @current_user ||= User.find_by(id: session[:user_id])
+  #   # elsif cookies.signed[:user_id]
+  #   #   user = User.find_by(id: cookies.signed[:user_id])
+  #   #   if user && user.authenticated?(cookies[:remember_token])
+  #   #     log_in user
+  #   #     @current_user = user
+  #   #   end
+  #   # end
+
+  #   # ↑のコードでもいいが…
+  #   # sessionメソッドとcookiesメソッドをそれぞれ二回ずつ使っているので、
+  #   # これを綺麗にするためローカル変数を使う
+
+  #   # セッションユーザーidをユーザーidに代入した結果、ユーザーIDのセッションが存在すればtrueとなる
+  #   # 代入とsession[:user_id]があるかどうかを一回で条件式にしている
+  #   # 一時的なセッションユーザーがいる場合処理を行い、user_idに代入
+  #   if (user_id = session[:user_id])
+  #     # 現在のユーザーがいればそのまま、いなければsessionユーザーidと同じidを持つユーザーを
+  #     # DBから探して@current_user（現在のログインユーザー）に代入
+  #     @current_user ||= User.find_by(id: user_id)
+  #     # user_idを暗号化した永続的なユーザーがいる（cookiesがある）場合処理を行い、user_idに代入
+  #   elsif (user_id = cookies.signed[:user_id])
+
+  #     # raise       # テストがパスすれば、この部分がテストされていないことがわかる
+  #     # テストを書き直したので、コメントアウト(削除)する
+
+  #     # 暗号化したユーザーidと同じユーザーidをもつユーザーをDBから探し、userに代入
+  #     user = User.find_by(id: user_id)
+  #     # DBのユーザーがいるかつ、受け取った記憶トークンをハッシュ化した記憶ダイジェストを持つ
+  #     # ユーザーがいる場合処理を行う
+
+  #     # current_user内の抽象化したauthenticated?メソッドのため変更する
+  #     # if user && user.authenticated?(cookies[:remember_token])
+  #     if user && user.authenticated?(:remember, cookies[:remember_token])
+  #       # 一致したユーザーでログインする
+  #       log_in user
+  #       # 現在のユーザーに一致したユーザーを設定
+  #       @current_user = user
+  #     end
+  #   end
+  # end
+
   def current_user
-    # # if文を使うことで、ユーザーが存在しない場合はnilを返して終わり
-    # # いない場合でも何回もDBへ問い合わせしていないので早い
-
-    # # いる場合は、ログインユーザーのidとDBのidが同じユーザーを返している
-    # 現在ログイン中のユーザーを返す (いる場合)
-    # if session[:user_id]
-    #   # User.find(session[:user_id])だとユーザーIDが存在しない状態でfindを使うと例外が発生してしまう
-
-    #   # User.find_by(id: session[:user_id])だと
-    #   # IDが無効（ユーザーが存在しない）の場合でもメソッドはエラーを発生せずに「nil」を返してくれる
-
-    #   # 実行結果をインスタンス変数に代入する
-    #   # こうすることで、1リクエスト内におけるDBへの問い合わせは最初の一回だけになり、
-    #   # 以後の呼び出しではインスタンス変数の結果を再利用するだけになる。
-    #   # Webサービスを高速化させる重要なテクニック
-
-    #   # or演算子「||」
-    #   # ||=は、手前の@current_userがあれば@current_userに代入、なければUser.find〜を代入
-
-    #   # ログインユーザーがいればそのまま、いなければcookiesのユーザーidと同じidを持つユーザーを
-    #   # DBから探して@current_user（現在のログインユーザー）に代入
-    #   @current_user ||= User.find_by(id: session[:user_id])
-    # end
-
-
-    # ↑のコードでは、ログインするユーザーはブラウザで有効な記憶トークンを得られるように記憶されているが、
-    # current_userメソッドでは一時セッションしか扱っておらず、
-    # このままでは正常に動作しない。
-    # つまり、今のままでは現在のログイン中ユーザーがいない場合、
-    # 全部sessionID（一時的なid）がcookieとして保存されてしまう
-
-    # if session[:user_id]
-    #   @current_user ||= User.find_by(id: session[:user_id])
-    # elsif cookies.signed[:user_id]
-    #   user = User.find_by(id: cookies.signed[:user_id])
-    #   if user && user.authenticated?(cookies[:remember_token])
-    #     log_in user
-    #     @current_user = user
-    #   end
-    # end
-
-    # ↑のコードでもいいが…
-    # sessionメソッドとcookiesメソッドをそれぞれ二回ずつ使っているので、
-    # これを綺麗にするためローカル変数を使う
-
-    # セッションユーザーidをユーザーidに代入した結果、ユーザーIDのセッションが存在すればtrueとなる
-    # 代入とsession[:user_id]があるかどうかを一回で条件式にしている
-    # 一時的なセッションユーザーがいる場合処理を行い、user_idに代入
     if (user_id = session[:user_id])
-      # 現在のユーザーがいればそのまま、いなければsessionユーザーidと同じidを持つユーザーを
-      # DBから探して@current_user（現在のログインユーザー）に代入
       @current_user ||= User.find_by(id: user_id)
-      # user_idを暗号化した永続的なユーザーがいる（cookiesがある）場合処理を行い、user_idに代入
     elsif (user_id = cookies.signed[:user_id])
-
-      # raise       # テストがパスすれば、この部分がテストされていないことがわかる
-      # テストを書き直したので、コメントアウト(削除)する
-
-      # 暗号化したユーザーidと同じユーザーidをもつユーザーをDBから探し、userに代入
       user = User.find_by(id: user_id)
-      # DBのユーザーがいるかつ、受け取った記憶トークンをハッシュ化した記憶ダイジェストを持つ
-      # ユーザーがいる場合処理を行う
-      if user && user.authenticated?(cookies[:remember_token])
-        # 一致したユーザーでログインする
+      if user && user.authenticated?(:remember, cookies[:remember_token])
         log_in user
-        # 現在のユーザーに一致したユーザーを設定
         @current_user = user
       end
     end

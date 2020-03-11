@@ -1,5 +1,14 @@
 class User < ApplicationRecord
-  attr_accessor :remember_token
+  attr_accessor :remember_token, :activation_token
+  # 2つとも「コールバック」メソッド
+  # before_saveがbefore_createよりも先に実行される
+  # →「create」して「save」ではない
+  # オブジェクトがDBに保存される直前で実行
+  before_save   :downcase_email
+  # オブジェクトがDBに新規保存(INSERT)される直前で実行
+#   オブジェクトが作成された時だけコールバックを呼び出したい。
+# （それ以外の時は呼び出したくない）メソッド参照と呼ばれる
+  before_create :create_activation_digest
 
   # validates :name, presence: true,length: { maximum: 50 }
   # validates :email, presence: true,length: { maximum: 255 }
@@ -98,14 +107,24 @@ class User < ApplicationRecord
   # 比較に使っている==演算子ならOK
 
   # 渡されたトークンがダイジェストと一致したらtrueを返す
-  def authenticated?(remember_token)
-    # 「user_test.rb」test "authenticated? should return~"をクリアさせる
-    # 記憶ダイジェストがnilの場合にfalseを返す
-    # 記憶ダイジェストがnilの場合、returnでfalseを返すことで、即座にメソッドを終了している
+  # アカウント有効化のダイジェストと、渡されたトークンが一致するかどうかをチェック
+  # def authenticated?(remember_token)
+  #   # 「user_test.rb」test "authenticated? should return~"をクリアさせる
+  #   # 記憶ダイジェストがnilの場合にfalseを返す
+  #   # 記憶ダイジェストがnilの場合、returnでfalseを返すことで、即座にメソッドを終了している
 
-    # →処理を中途で終了する場合によく使われる使いかた
-    return false if remember_digest.nil?
-    BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  #   # →処理を中途で終了する場合によく使われる使いかた
+  #   # return false if remember_digest.nil?
+  #   # BCrypt::Password.new(remember_digest).is_password?(remember_token)
+  # end
+
+  # 各引数を一般化し、文字列の式展開も利用する↑
+  def authenticated?(attribute, token)
+    # モデル内にあるのでselfは省略することもできる
+    # digest = self.send("#{attribute}_digest")
+    digest = send("#{attribute}_digest")
+    return false if digest.nil?
+    BCrypt::Password.new(digest).is_password?(token)
   end
 
   # ユーザーのログイン情報を破棄する
@@ -113,5 +132,47 @@ class User < ApplicationRecord
   def forget
     # DBにある記憶ダイジェストをnilにする
     update_attribute(:remember_digest, nil)
+  end
+
+  # メールアドレスをすべて小文字にする
+  def downcase_email
+    self.email = email.downcase
+  end
+
+  # 有効化トークンとダイジェストを作成および代入する
+  def create_activation_digest
+    # ハッシュ化した記憶トークンを有効化トークン属性に代入
+    self.activation_token  = User.new_token
+    # 有効化トークンをBcryptで暗号化し、有効化ダイジェスト属性に代入
+    self.activation_digest = User.digest(activation_token)
+  end
+
+  # アカウントを有効にする
+  def activate
+    # update_attribute(:activated,    true)
+    # update_attribute(:activated_at, Time.zone.now)
+    # 変更↓
+    update_columns(activated: true, activated_at: Time.zone.now)
+  end
+
+  # 有効化用のメールを送信する
+  def send_activation_email
+    UserMailer.account_activation(self).deliver_now
+  end
+
+  private
+
+  # メールアドレスを全て小文字にする
+  def downcase_email
+    # emailを小文字化してUserオブジェクトのemail属性に代入
+    self.email = email.downcase
+  end
+
+  # 有効化トークンとダイジェストを作成および代入する
+  def create_activation_digest
+    # ハッシュ化した記憶トークンを有効化トークン属性に代入
+    self.activation_token = User.new_token
+    # 有効化トークンをBcryptで暗号化し、有効化ダイジェスト属性に代入
+    self.activation_digest  =   User.digest(activation_token)
   end
 end

@@ -95,4 +95,21 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     end
     assert_redirected_to root_url
   end
+
+  # 11.38 演習3
+  # # /users と /users/:id の両方に対する統合テスト
+  # test "should not allow the not activated attribute" do
+  #   # 非有効化ユーザーでログイン
+  #   log_in_as (@non_activated_user)
+  #   # 有効化でないことを検証
+  #   assert_not @non_activated_user.activated?
+  #   # /usersを取得
+  #   get users_path
+  #   # 非有効化ユーザーが表示されていないことを確認
+  #   assert_select "a[href=?]", user_path(@non_activated_user), count: 0
+  #   # 非有効化ユーザーidのページを取得
+  #   get user_path(@non_activated_user)
+  #   # ルートurlにリダイレクトされればtrue
+  #   assert_redirected_to root_url
+  # end
 end

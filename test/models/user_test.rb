@@ -94,6 +94,10 @@ class UserTest < ActiveSupport::TestCase
   # authenticatedメソッドで記憶ダイジェストを暗号化できるか検証
   test "authenticated? should return false for a user with nil digest" do
     # @userのユーザーの記憶ダイジェストと引数で受け取った値が同一ならfalse、異なるならtrueを返す
-    assert_not @user.authenticated?('')
+    # assert_not @user.authenticated?('')
+
+    # Userテスト内の抽象化したauthenticated?メソッド
+    # @userのユーザーの記憶ダイジェストと、引数で受け取った値が同一ならfalse、異なるならtrueを返す
+    assert_not @user.authenticated?(:remember, '')
   end
 end

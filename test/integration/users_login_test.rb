@@ -14,6 +14,7 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     # セッション用パスに有効な情報をpost
     post login_path, params: { session: { email:    @user.email,
                                           password: 'password' } }
+    assert is_logged_in?
     assert_redirected_to @user
     follow_redirect!
     assert_template 'users/show'
@@ -31,10 +32,10 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     assert_redirected_to root_url
 
     #2番目のウィンドウでログアウトをクリックするユーザーをシミュレートする
+    delete logout_path
     # 2回目のログアウトでcurrent_userがないためテストが「失敗することを確認」
     # このままでは、テストは通らないため「sessions_controller.rb」の
     # destroyメソッドに、ログアウトする時はログインしている時という条件式を追加する
-    delete logout_path
     follow_redirect!
     # login_path(/login)がhref=/loginというソースコードで存在していればtrue
     assert_select "a[href=?]", login_path

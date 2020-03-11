@@ -15,11 +15,15 @@ class UsersController < ApplicationController
     # @users = User.all↓変更する
     # @users = User.allのままでは、ページネーションは動かない
     # →paginateメソッドを使った結果が必要だから
-    @users = User.paginate(page: params[:page])
+    # @users = User.paginate(page: params[:page]) ↓変更
+
+    @users = User.where(activated: true).paginate(page: params[:page])
   end
 
   def show
     @user = User.find(params[:id])
+    # activatedがfalseならルートURLヘリダイレクト
+    redirect_to root_url and return unless @user.activated?
   end
 
   def new
@@ -30,12 +34,27 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     if @user.save
+      # ユーザーモデルオブジェクトからメールを送信する
+      # アカウント有効化メールの送信
+      @user.send_activation_email
+
       # SessionsHelperのログインするメソッド
       # log_inメソッド(ログイン)の引数として@user(ユーザーオブジェクト)を渡す。
       # 要はセッションに渡すってこと
-      log_in @user
-      redirect_to @user
-      flash[:success] = "Welcome to the Sample App!"
+      # log_in @user
+      # redirect_to @user
+      # flash[:success] = "Welcome to the Sample App!"
+
+      # ユーザー登録にアカウント有効化を追加
+      # アカウント有効化メールの送信
+
+      # リダイレクト先をプロフィールページからルートURLに変更し、
+      # かつユーザーは以前のようにログインしないようになっています
+
+      # 11.36:で消えた
+      # UserMailer.account_activation(@user).deliver_now
+      flash[:info] = "Please check your email to activate your account."
+      redirect_to root_url
     else
       render 'new'
     end
