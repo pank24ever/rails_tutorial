@@ -25,8 +25,6 @@ require 'rails_helper'
 #   end
 # end
 
-<<<<<<< HEAD
-=======
 require 'rails_helper'
 
 RSpec.describe 'Access to static_pages', type: :request do
@@ -61,4 +59,3 @@ RSpec.describe 'Access to static_pages', type: :request do
     end
   end
 end
->>>>>>> rails-flavored-ruby
