@@ -1,5 +1,3 @@
-require 'rails_helper'
-
 # # テストしたい対象を記載する
 # describe 'Home' do
 #   # テストしたい内容の詳細
@@ -36,7 +34,10 @@ RSpec.describe 'Access to static_pages', type: :request do
       expect(response).to have_http_status 200
     end
     it "has title 'Ruby on Rails Tutorial Sample App'" do
-      expect(response.body).to include 'Ruby on Rails Tutorial Sample App'
+      # expect(response.body).to include 'Ruby on Rails Tutorial Sample App'↓
+      #変更部分
+      # application.helperのテスト
+      expect(responce.body).to include full_title('')
       expect(response.body).to_not include '| Ruby on Rails Tutorial Sample App'
     end
   end
@@ -46,7 +47,8 @@ RSpec.describe 'Access to static_pages', type: :request do
       expect(response).to have_http_status 200
     end
     it "has title 'Home | Ruby on Rails Tutorial Sample App'" do
-      expect(response.body).to include 'Help | Ruby on Rails Tutorial Sample App'
+      # expect(response.body).to include 'Help | Ruby on Rails Tutorial Sample App'
+      expect(response.body).to include full_title('Help')
     end
   end
   context 'GET #about' do
@@ -55,7 +57,8 @@ RSpec.describe 'Access to static_pages', type: :request do
       expect(response).to have_http_status 200
     end
     it "has title 'Home | Ruby on Rails Tutorial Sample App'" do
-      expect(response.body).to include 'About | Ruby on Rails Tutorial Sample App'
+      # expect(response.body).to include 'About | Ruby on Rails Tutorial Sample App'
+      expect(response.body).to include full_title('About')
     end
   end
 end

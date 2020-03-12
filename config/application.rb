@@ -25,6 +25,7 @@ module SampleApp
                        controller_specs: true,
                        request_specs: false
       g.fixture_replacement :factory_bot, dir: "spec/factories"
+    config.generators.system_tests = nil
     end
   end
 end

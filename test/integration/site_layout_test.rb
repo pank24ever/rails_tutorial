@@ -6,6 +6,7 @@ class SiteLayoutTest < ActionDispatch::IntegrationTest
     @user = users(:michael)
   end
 
+  # Homeページが正しいビューを描画しているかどうか確かめている
   test "layout links" do
     get root_path
     assert_template 'static_pages/home'
