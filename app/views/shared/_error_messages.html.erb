@@ -1,0 +1,32 @@
+<%
+=begin%>
+ エラーメッセージ用のパーシャル
+<%
+=end%>
+<%
+=begin%>
+ any?メソッドは存在があるか確認するメソッド、empty?の反対
+<%
+=end%>
+<% if @user.errors.any? %>
+  <div id="error_explanation">
+    <div class="alert alert-danger">
+    <%
+=begin%>
+ #pluralizeメソッド（Stringクラス） 英語の単数形を複数形に変換
+<%
+=end%>
+<%
+=begin%>
+ これを使うことによって、"1errors"とか文法上の間違いを起きないようにする
+<%
+=end%>
+      The form contains <%= pluralize(@user.errors.count, "error") %>.
+    </div>
+    <ul>
+    <% @user.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>

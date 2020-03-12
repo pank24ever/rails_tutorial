@@ -1,0 +1,26 @@
+<% provide(:title, 'All users') %>
+<h1>All users</h1>
+
+<%= will_paginate %>
+
+<ul class="users">
+  # <% @users.each do |user| %>
+  #   <li>
+  #       10章にてリファクタリング
+  #     <%= gravatar_for user, size: 50 %>
+  #     <%= link_to user.name, user %>
+
+      #Railsは自動的に_user.html.erbという名前のパーシャルを探しにいく/
+      # <%= render user %>
+      # @users変数に対して直接実行します
+      # @users をUserオブジェクトのリストであると推測します。
+      # さらに、ユーザーのコレクションを与えて呼び出すと、Railsは自動的にユーザーの
+      # コレクションを列挙し、それぞれのユーザーを_user.html.erbパーシャルで出力します
+
+      # each doメソッドを使わずに、@usersのユーザーを順に取り出して表示することが可能
+  <%= render @users %>
+  #   </li>
+  # <% end %>
+</ul>
+
+<%= will_paginate %>
