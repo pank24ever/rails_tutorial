@@ -1,0 +1,15 @@
+current directory: /Users/pank24ever/environment/rails/rails_tutorial/sample_app/vendor/bundle/ruby/2.5.0/gems/websocket-driver-0.6.5/ext/websocket-driver
+/Users/pank24ever/.rbenv/versions/2.5.1/bin/ruby -I /Users/pank24ever/.rbenv/versions/2.5.1/lib/ruby/site_ruby/2.5.0 -r ./siteconf20200312-81728-1cjxnza.rb extconf.rb
+creating Makefile
+
+current directory: /Users/pank24ever/environment/rails/rails_tutorial/sample_app/vendor/bundle/ruby/2.5.0/gems/websocket-driver-0.6.5/ext/websocket-driver
+make "DESTDIR=" clean
+
+current directory: /Users/pank24ever/environment/rails/rails_tutorial/sample_app/vendor/bundle/ruby/2.5.0/gems/websocket-driver-0.6.5/ext/websocket-driver
+make "DESTDIR="
+compiling websocket_mask.c
+linking shared-object websocket_mask.bundle
+
+current directory: /Users/pank24ever/environment/rails/rails_tutorial/sample_app/vendor/bundle/ruby/2.5.0/gems/websocket-driver-0.6.5/ext/websocket-driver
+make "DESTDIR=" install
+/usr/bin/install -c -m 0755 websocket_mask.bundle ./.gem.20200312-81728-1tm9vpi
