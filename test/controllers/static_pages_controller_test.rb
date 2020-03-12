@@ -12,7 +12,11 @@ class StaticPagesControllerTest < ActionDispatch::IntegrationTest
   end
 
   # test "should get home" do
+
+  # GETリクエストをhomeアクションに対して送信した
   #   get static_pages_home_url
+
+  # コントローラからのHTTPレスポンスを検証
   #   assert_response :success
   #   assert_select "title", "Home | #{@base_title}"
   # end
