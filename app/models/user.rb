@@ -25,7 +25,14 @@ class User < ApplicationRecord
   validates :name,  presence: true, length: { maximum: 50 }
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   validates :email, presence: true, length: { maximum: 255 },
+
+                    # メールのフォーマット(型)を決めている
+                    # →なぜか…？文字列ならなんでもOKということを阻止するため
+                    # →そうするには、「正規表現」を使用したほうがいいよね！
+                    # →上で、正規表現を定義して変数に入れている
+                    # ↓で、変数を引数にすることで可読性がよくなるよね！
                     format: { with: VALID_EMAIL_REGEX },
+
                     # uniqueness: true, ↓このままでは一意性検証では
                     # 大文字小文字で区別はされているが同じメールアドレスが複製可能となっている
                     uniqueness: { case_sensitive: false }

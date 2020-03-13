@@ -1,4 +1,4 @@
-wrequire 'test_helper'
+require 'test_helper'
 
 class UserTest < ActiveSupport::TestCase
   # test "the truth" do
@@ -14,41 +14,67 @@ class UserTest < ActiveSupport::TestCase
       password: "foobar", password_confirmation: "foobar")
   end
 
+  # @user(インスタンスが有効かテスト)
+  # 「.valid」メソッドは有効性を図るメソッド
   test "should be valid" do
     assert @user.valid?
   end
 
+  # 名前属性の有効性に対するテスト
   test "name should be present" do
     @user.name = "     "
-    # @userが無効なら成功、有効なら失敗
+    # @userが「無効」なら成功、有効なら失敗
+    # assert_not だからね！falseならOKってこと！
     assert_not @user.valid?
   end
 
+  # メール属性の有効性に対するテスト
   test "email should be present" do
     @user.email = "     "
     assert_not @user.valid?
   end
 
+  # 名前属性の長さに対するテスト
   test "name should not be too long" do
     @user.name = "a" * 51
+    # ↑51文字以上は、使えない ↓有効性を図るメソッド
     assert_not @user.valid?
   end
 
+  # メール属性の長さに対するテスト
   test "email should not be too long" do
     @user.email = "a" * 244 + "@example.com"
     assert_not @user.valid?
   end
 
   # 登録するメールアドレスのテスト
+  # 有効なメールフォーマットをテスト
+  # →ただの文字列を許容しないように「型」をある程度決めておく
   # 書き方はこれで決まっているのか…？
   test "email validation should accept valid addresses" do
+    #5つのアドレスを配列で指定
     valid_addresses = %w[user@example.com USER@foo.COM A_US-ER@foo.bar.org
                          first.last@foo.jp alice+bob@baz.cn]
+    #それぞれの要素をブロックvalid_addressに繰り返し代入。eachで一個ずつ検証
     valid_addresses.each do |valid_address|
       @user.email = valid_address
       # inspectメソッドは、オブジェクトや配列などを文字列で返す
-      # 第2引数でどのメールアドレスで失敗したかエラーメッセージを追加
+      # 第2引数でどのメールアドレスで「失敗」したかエラーメッセージを追加
+
+      # 詳細な文字列を調べるために「inspectメソッド」で調べている
+      # →.が,となっていたり、@がないメールアドレスで失敗するかどうかを検証する
       assert @user.valid?, "#{valid_address.inspect} should be valid"
+    end
+  end
+
+  # こちらが、↑とは違って、有効ではないメールのフォーマット
+  # →排除するべきフォーマット
+  test "email validation should reject invalid addresses" do
+    invalid_addresses = %w[user@example,com user_at_foo.org user.name@example.
+                           foo@bar_baz.com foo@bar+baz.com]
+    invalid_addresses.each do |invalid_address|
+      @user.email = invalid_address
+      assert_not @user.valid?, "#{invalid_address.inspect} should be invalid"
     end
   end
 
