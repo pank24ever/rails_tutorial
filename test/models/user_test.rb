@@ -82,23 +82,29 @@ class UserTest < ActiveSupport::TestCase
   test "email addresses should be unique" do
     #@userを複製する
     # 重複したユーザーを作成する為、dupメソッドを使う
+    # →「dup」メソッド = オブジェクトのコピーを作成
     duplicate_user = @user.dup
     # メールアドレスの文字列は大文字小文字の区別がないため、どちらの場合も検証しなければならない
     #複製したduplicate_userのメールアドレス欄の文字列を大文字にする
 
     # しかし、複製したユーザーのメールアドレスを大文字にしたもののvalidationがtrueになっている
-    # 同じメールアドレスが複製可能となっている
+    # →同じメールアドレスが複製可能となっている(大文字、少文字で区別はつけれている)
+
     # それではいけないので、モデルに:uniquenessに:case_sensitiveオプションをつける
     duplicate_user.email = @user.email.upcase
     @user.save
     assert_not duplicate_user.valid?
   end
 
+  # メールアドレスを小文字にするテスト
   test "email addresses should be saved as lower-case" do
     mixed_case_email = "Foo@ExAMPle.Com"
     @user.email = mixed_case_email
     @user.save
     # 値が一致しているかどうか確認する
+    #第一引数で@userのEmailを小文字に変換、
+    # 第二引数でDBからEmail(大文字小文字混同のemail)を再読み込み、
+    # この二つが同一であればtrueを返す
     assert_equal mixed_case_email.downcase, @user.reload.email
   end
 

@@ -19,10 +19,18 @@ class User < ApplicationRecord
   # →なぜか…大文字小文字の関係で同じ文字の並びなのに、違うメールと判断されないようにするため
   # before_save { self.email = self.email.downcase }でも可能
 
+  # DBレベルでは一意性をまだ保てていないため設定していく
+  # →Foo@ExAMPle.Comとfoo@example.comが別々の文字列と解釈してしまうので
+  # DBに保存される前に、すべて少文字にしてしまって保存するように
+  # コールバックメソッドを使用していく
+
   # before_save { self.email = email.downcase } ↓またさらに変更する
   # 破壊的メソッドを使い、selfを使わずにemailの文字列を小文字に変換
+  # →Userモデルの中では右式のselfを省略できる、左側のselfは省略することはできない
   before_save { email.downcase! }
   validates :name,  presence: true, length: { maximum: 50 }
+  # ２つの連続したドットはマッチさせないようにする
+  # →「foo@bar..com」のようなメールアドレスを許容しないように
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   validates :email, presence: true, length: { maximum: 255 },
 
@@ -33,8 +41,9 @@ class User < ApplicationRecord
                     # ↓で、変数を引数にすることで可読性がよくなるよね！
                     format: { with: VALID_EMAIL_REGEX },
 
-                    # uniqueness: true, ↓このままでは一意性検証では
-                    # 大文字小文字で区別はされているが同じメールアドレスが複製可能となっている
+                    # uniqueness: true, ↓このままでは一意性(重複しているメアド)検証では
+                    # 大文字小文字で「区別はされている」が
+                    # 同じメールアドレス(同じ並び)が複製可能となっている
                     uniqueness: { case_sensitive: false }
 
   # DBにレコード(オブジェクト)が生成された時だけ存在性(nilかどうか)のvalidationを行う
@@ -43,15 +52,19 @@ class User < ApplicationRecord
   # テストで空だった場合にvalidationを通すことができる
   has_secure_password
 
+  # validates :password, presence: true, length: { minimum: 6 }
+  # で、パスワードの最小文字数とかも設定(6章)
+
   # テストでは、名前とemailだけで更新できるようにしている
   # →しかし、allow_nil: true
   # パスワードが空のままでも更新できるようにする、空だった時の例外処理を加える
+
   # validates :password, presence: true, length: { minimum: 6 }のままでは
   # パスワードが空ですよと怒られてしまうため、「allow_nil」を追加する
   # passwordが空だったとしたらvalidationをスルー(true)する例外処理
 
-    # allow_nilのおかげでhas_secure_passwordによるバリデーションがそれぞれ実行され、
-    # 二つのエラーメッセージが表示されるバグも解決
+  # allow_nilのおかげでhas_secure_passwordによるバリデーションがそれぞれ実行され、
+  # 二つのエラーメッセージが表示されるバグも解決
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
   # 渡された文字列のハッシュ値を返す
