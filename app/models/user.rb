@@ -67,8 +67,10 @@ class User < ApplicationRecord
   # 二つのエラーメッセージが表示されるバグも解決
   validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
 
+  # 8.21
+  # レイアウトの変更をテストするために活用するメソッド
   # 渡された文字列のハッシュ値を返す
-  #fixture(テスト用のユーザーデータを流し込む場所的な)用に、
+  #fixture(テスト用のユーザーデータを流し込む場所的な)のパスワード用に、
   # password_digestの文字列をハッシュ化して、ハッシュ値として返す
   def User.digest(string)
     # min_costでコストパラメータを最小にし、

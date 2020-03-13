@@ -1,10 +1,22 @@
 module SessionsHelper
   # 渡されたユーザーでログインする
+  # login_inメソッドにuser(ログイン時にユーザーが送ったメールとパス)を引数として渡す
   def log_in(user)
+    # Railsで事前定義済みのsessionメソッド
+    # →sessionメソッドはSessionsコントローラとは無関係
+
     # ユーザーのブラウザ内の一時cookiesに暗号化済みのユーザーidが自動生成
+    # ユーザーidをsessionのuser_idに代入（ログインidの保持）
+
     # sessionメソッドで作られた一時cookiesは、ブラウザを閉じた瞬間に有効期限が終了
     # 撃者がたとえこの情報をcookiesから盗み出すことができたとしても、
     # それを使って本物のユーザーとしてログインすることはできない
+
+    # しかし、それはsessionメソッドで作成した「一時セッション」にしか該当せず、
+    # cookiesメソッドで作成した永続的セッションでは断言できない。
+    # (ブラウザ閉じて消えるsessionメソッドなら大丈夫だが、
+    # ブラウザ閉じても消えないcookiesメソッドだと危ないってこと)
+    # →なぜなら、cookiesの場合セッションハイジャックという攻撃を受ける可能性がある
     session[:user_id] = user.id
   end
 
@@ -37,10 +49,12 @@ module SessionsHelper
   #   # # いる場合は、ログインユーザーのidとDBのidが同じユーザーを返している
   #   # 現在ログイン中のユーザーを返す (いる場合)
   #   # if session[:user_id]
-  #   #   # User.find(session[:user_id])だとユーザーIDが存在しない状態でfindを使うと例外が発生してしまう
+  #   #   # User.find(session[:user_id])だとユーザーIDが存在しない状態で
+  #   #   # findを使うと例外が発生してしまう
 
   #   #   # User.find_by(id: session[:user_id])だと
-  #   #   # IDが無効（ユーザーが存在しない）の場合でもメソッドはエラーを発生せずに「nil」を返してくれる
+  #   #   # IDが無効（ユーザーが存在しない）の場合でもメソッドはエラーを発生せずに
+  #   #   #「nil」を返してくれる
 
   #   #   # 実行結果をインスタンス変数に代入する
   #   #   # こうすることで、1リクエスト内におけるDBへの問い合わせは最初の一回だけになり、
@@ -63,7 +77,19 @@ module SessionsHelper
   #   # 全部sessionID（一時的なid）がcookieとして保存されてしまう
 
   #   # if session[:user_id]
+
+
+  #   #ログインユーザーがいればそのまま、いなければcookiesのユーザーidと同じidを持つユーザーを
+  #   #DBから探して@current_user（現在のログインユーザー）に代入
+  # #if @current_user.nil?
+  #   #@current_user = User.find_by(id: session[:user_id])
+  # #else
+  #   #@current_user
+  # #end ↓のコードを1行にしている
+
   #   #   @current_user ||= User.find_by(id: session[:user_id])
+
+
   #   # elsif cookies.signed[:user_id]
   #   #   user = User.find_by(id: cookies.signed[:user_id])
   #   #   if user && user.authenticated?(cookies[:remember_token])
@@ -105,6 +131,7 @@ module SessionsHelper
   #   end
   # end
 
+  # ↑各コードの説明は上に
   def current_user
     if (user_id = session[:user_id])
       @current_user ||= User.find_by(id: user_id)
@@ -118,10 +145,12 @@ module SessionsHelper
   end
 
   # ログインしているか確かめるメソッド
+  # →レイアウトのリンクをログインしているかによって、表示をわける
+
   # ユーザーがログインしていればtrue、その他ならfalseを返す
   def logged_in?
     # !を先頭に付けることによって、否定演算子(not)を使い、
-    # 本来ならnilならtrueの所をnilじゃないならtrueにしている
+    # 本来ならnilならtrueの所をnil「じゃない」ならtrueにしている
     !current_user.nil?
   end
 

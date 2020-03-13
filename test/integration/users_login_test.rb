@@ -28,6 +28,7 @@ class UsersLoginTest < ActionDispatch::IntegrationTest
     #ログアウト用
     delete logout_path
     # テストユーザーのセッションが空、ログインしていなければ（ログアウトできたら）true
+    # test/test_helper.rbのメソッド
     assert_not is_logged_in?
     assert_redirected_to root_url
 

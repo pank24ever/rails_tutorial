@@ -3,18 +3,26 @@ class SessionsController < ApplicationController
   end
 
   # def create
+
+  # 8.7
   #   # 全ての大文字を対応する小文字に置き換えた文字列
   #   # paramsハッシュから値をうけとって、少文字化する。そして、Userモデルに検索をかける
   #   # user = User.find_by(email: params[:session][:email].downcase)
+
 
   #   # コントローラで定義したインスタンス変数にテストの内部からアクセスするには、
   #   # テスト内部でassignsメソッドを使うとできる
 
   #   # なぜ「user」ローカル変数から、「@user」インスタンス変数に変換したのか…？
   #   # →cookiesにユーザー記憶トークンが正しく含まれているかどうかテストできるようになるから
+  #   #「.downcase」メソッドで有効なメールアドレスが入力されたときに確実にマッチするようにしている
   #   @user = User.find_by(email: params[:session][:email].downcase)
-  #   # [望ましい結果 ]有効なユーザー&&正しいパスワード	(true && true) == true
-  #   # if user && user.authenticate(params[:session][:password])
+
+
+  #  #user変数がデータベースに存在し、なおかつparamsハッシュで受け取ったpassword値と、
+  #  #userのemail値が同じ(パスワードとメールアドレスが同じ値であれば)true
+  #   # →[望ましい結果 ]有効なユーザー&&正しいパスワード	(true && true) == true
+  #   # if user && user.authenticate(params[:session][:password]) ↓変更
 
   #   if @user && @user.authenticate(params[:session][:password])
   #     # ユーザーログイン後にユーザー情報のページにリダイレクトする
