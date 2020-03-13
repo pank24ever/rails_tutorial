@@ -30,7 +30,8 @@ class UsersController < ApplicationController
     @user = User.new(params[:user])
   end
 
-  # 引数にuser_params(privateメソッド)として使用
+  # 引数にuser_params(privateメソッド、StrongParameters)として使用
+  # →そうすることで、Controller内で使用することができる
   def create
     @user = User.new(user_params)
     if @user.save
@@ -42,7 +43,10 @@ class UsersController < ApplicationController
       # log_inメソッド(ログイン)の引数として@user(ユーザーオブジェクト)を渡す。
       # 要はセッションに渡すってこと
       # log_in @user
-      # redirect_to @user
+
+      # redirect_to @user このコードは↓の通り
+      # redirect_to user_url(@user)1
+
       # flash[:success] = "Welcome to the Sample App!"
 
       # ユーザー登録にアカウント有効化を追加

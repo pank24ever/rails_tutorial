@@ -1,26 +1,26 @@
-<%
-=begin%>
- エラーメッセージ用のパーシャル
-<%
-=end%>
-<%
-=begin%>
- any?メソッドは存在があるか確認するメソッド、empty?の反対
-<%
-=end%>
+
+# エラーメッセージ用のパーシャル
+
+# any?メソッドは存在があるか確認するメソッド、empty?の反対
+# →userオブジェクトが空の場合trueを返す
+
 <% if @user.errors.any? %>
   <div id="error_explanation">
     <div class="alert alert-danger">
-    <%
-=begin%>
- #pluralizeメソッド（Stringクラス） 英語の単数形を複数形に変換
-<%
-=end%>
-<%
-=begin%>
- これを使うことによって、"1errors"とか文法上の間違いを起きないようにする
-<%
-=end%>
+
+# pluralizeメソッド（Stringクラス） 英語の単数形を複数形に変換
+# これを使うことによって、"1errors"とか文法上の間違いを起きないようにする
+# →英語専用のテキストヘルパー。
+# 最初の引数に整数があると、それに基づいて２番目の引数である英単語が複数形に変化したものが渡される
+
+# countメソッドはエラーの数を返す
+
+# 2つのメソッドを組み合わせることで、
+# 第一引数のエラーにcountメソッドでエラーの数を数え、エラーの数に応じて、
+# 第二引数のerrorが、
+# 単数形のerrorが複数形のerrorsを返す
+# →すると、適切な複数形の英単語に変換してくれる
+
       The form contains <%= pluralize(@user.errors.count, "error") %>.
     </div>
     <ul>
