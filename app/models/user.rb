@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+  # attr_accessor(インスタンス変数の定義)属性を作成
+  # インスタンス変数の定義→下で定義されているrememberメソッドを使用するため
   attr_accessor :remember_token, :activation_token
   # 2つとも「コールバック」メソッド
   # before_saveがbefore_createよりも先に実行される
@@ -87,6 +89,19 @@ class User < ApplicationRecord
   #   BCrypt::Password.create(string, cost: cost)
   # end
 
+
+  # cookiesを盗み出す攻撃から対策をとる
+  # → セキュリティ上重要になる可能性のある情報を表示する時には、デジタル署名を使う
+  # = トークンが盗まれても大丈夫なようにする→永続的セッションを生成する
+  # → ①記憶トークンにランダムな文字列を生成
+  # → ②ブラウザのcookiesにトークンを保存する時には、有効期限を設定
+  # → ③トークンはハッシュ値に変換してからDBに保存
+  # → ④ブラウザのcookiesに保存するユーザーIDは暗号化
+  # → ⑤永続ユーザーIDを含むcookiesを受け取ったら、そのIDでデータベースを検索し、
+  #   記憶トークンのcookiesがデータベース内のハッシュ値と一致することを確認
+
+  # ①
+  # 記憶トークン作成 → urlsafe_base64メソッド
   # ランダムなトークンを返す
   def User.new_token
     # 記憶トークン作成のメソッド
@@ -99,7 +114,14 @@ class User < ApplicationRecord
   #   SecureRandom.urlsafe_base64
   # end
 
-  # 永続セッションのためにユーザーをデータベースに記憶する
+
+  # Userモデルには、remember_token属性はまだ追加されていない
+  # →このためuser.remember_tokenメソッドを使ってトークンにアクセスできるようにし、
+  # かつ、トークンをDBに保存せずに実装する必要がある
+  # →attr_accessorを使って「仮想の」属性を作成してremember_tokenのコードを自分で書く
+
+  # 記憶トークンをユーザーと関連付け、トークンに対応する記憶ダイジェストをDBに保存
+  # 永続セッションのためにユーザーをDBに記憶する
   # 記憶トークンをユーザーオブジェクトに代入し、DBのデータを更新する
   def remember
     # remeber_tokenをUserクラスオブジェクトの属性として扱うには、
@@ -108,12 +130,17 @@ class User < ApplicationRecord
 
     # User.new_tokenで記憶トークンを作成
     # 記憶トークンをremember_token属性に代入
+    # selfを付けないと新たに変数が定義されてしまう
     self.remember_token = User.new_token
     # DBに対して記憶ダイジェストを更新せよという命令
     # User.digestを適用した結果で記憶ダイジェストを更新
     # DBのremember_token属性値をBcryptに渡してハッシュ化して更新
+
+    # update_attributeメソッドには、バリデーションを回避するという特性があるので、
+    # これを利用してパスワードなどを設定せずに属性値を更新できる
     update_attribute(:remember_digest, User.digest(remember_token))
   end
+
 
   # 渡されたトークンがユーザーの記憶ダイジェストと一致することを確認
   # 攻撃者がidとパスワードのcookieを奪い取ったとしても、最後のBCryptによる、
@@ -131,16 +158,18 @@ class User < ApplicationRecord
   # 渡されたトークンがダイジェストと一致したらtrueを返す
   # アカウント有効化のダイジェストと、渡されたトークンが一致するかどうかをチェック
   # def authenticated?(remember_token)
+
   #   # 「user_test.rb」test "authenticated? should return~"をクリアさせる
   #   # 記憶ダイジェストがnilの場合にfalseを返す
   #   # 記憶ダイジェストがnilの場合、returnでfalseを返すことで、即座にメソッドを終了している
 
   #   # →処理を中途で終了する場合によく使われる使いかた
   #   # return false if remember_digest.nil?
+
   #   # BCrypt::Password.new(remember_digest).is_password?(remember_token)
   # end
 
-  # 各引数を一般化し、文字列の式展開も利用する↑
+  # 各引数を一般化し、文字列の式展開も利用する↑のメソッドの改良版
   def authenticated?(attribute, token)
     # モデル内にあるのでselfは省略することもできる
     # digest = self.send("#{attribute}_digest")
@@ -148,6 +177,7 @@ class User < ApplicationRecord
     return false if digest.nil?
     BCrypt::Password.new(digest).is_password?(token)
   end
+
 
   # ユーザーのログイン情報を破棄する
   # user.remember「上にあるユーザーを覚えるメソッド」が取り消され

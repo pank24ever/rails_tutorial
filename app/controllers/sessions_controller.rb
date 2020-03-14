@@ -83,6 +83,8 @@ class SessionsController < ApplicationController
         log_in @user
         # ログイン時、sessionのremember_me属性が1(チェックボックスがオン)なら
         # セッションを永続的に、それ以外なら永続的セッションを破棄する
+
+        # Sessionヘルパーの「remember」「forget」メソッド
         params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
         redirect_back_or @user
       else
@@ -106,6 +108,7 @@ class SessionsController < ApplicationController
     # log_out ↓から変更
 
     # ユーザーがログインしていればログアウトする
+    # ログアウトする時はログインしている時
     log_out if logged_in?
     redirect_to root_url
   end

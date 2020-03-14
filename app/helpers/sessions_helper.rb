@@ -21,7 +21,8 @@ module SessionsHelper
   end
 
   # ユーザーのセッションを永続的にする
-  # rememberメソッドにuser(ログイン時にユーザーが送ったメールとパスと同一の、DBにいるユーザー)を引数として渡す
+  # rememberメソッドにuser(ログイン時にユーザーが送ったメールとパスと同一の、
+  # DBにいるユーザーを引数として渡す
   def remember(user)
     # SessionsHelperのメソッド
     # ログイン時のユーザーと同一のDBのユーザーに、記憶トークンを生成して
@@ -181,6 +182,7 @@ module SessionsHelper
   # 上のcurrent_userメソッドの「if」「elsif」
   # →current_userメソッドの最終的な評価結果は、期待どおりnilになります
 
+  # ユーザーをログアウトする
   def log_out
     # ↑のメソッド
     forget(current_user)
