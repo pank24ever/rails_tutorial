@@ -3,6 +3,10 @@ module UsersHelper
   # APIを使用している
   def gravatar_for(user, options = { size: 80 })
     #小文字化したuserメールをMD5でハッシュ化し、変数に代入
+    # Digestライブラリのhexdigestメソッドを使うとMD5のハッシュ化が実現
+
+    # →メールアドレスは大文字小文字を区別しないが、MD5ハッシュでは大文字小文字が区別されるので、
+    # downcaseメソッドで小文字化
     gravatar_id = Digest::MD5::hexdigest(user.email.downcase)
     size = options[:size]
     #gravatarのURLに変数展開,画像用の変数に代入
